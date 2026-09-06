@@ -30,6 +30,9 @@ jobs:
         run: npm run build
         env:
           GH_PAGES: "1"
+          # Optional: set repo secret VITE_TOMTOM_API_KEY for live TomTom on Pages.
+          # Whitelist https://moscraciunxxx.github.io in the TomTom developer portal.
+          VITE_TOMTOM_API_KEY: ${{ secrets.VITE_TOMTOM_API_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
