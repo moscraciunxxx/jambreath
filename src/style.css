@@ -26,9 +26,12 @@ h1 { margin: 0 0 6px; font-size: clamp(1.6rem, 3vw, 2rem); letter-spacing: -0.03
 .card {
   background: var(--card); border: 1px solid var(--line); border-radius: 14px;
   padding: 16px; margin-bottom: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
 }
 .row { display: flex; flex-wrap: wrap; gap: 10px; }
+.toolbar { gap: 12px; }
 label { display: flex; flex-direction: column; gap: 4px; flex: 1 1 220px; font-size: 13px; color: var(--muted); }
+label.check { flex-direction: row; align-items: center; gap: 8px; flex: 1 1 auto; color: var(--ink); }
 input, select, button {
   font: inherit; border-radius: 10px; border: 1px solid var(--line);
   background: #0e1613; color: var(--ink); padding: 10px 12px;
@@ -49,7 +52,28 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .metric.ok b { color: var(--ok); }
 .list { margin: 0; padding-left: 18px; color: var(--muted); }
 .list li { margin: 6px 0; }
+.list li.jammy { color: #ffb4b4; }
 .foot { color: var(--muted); font-size: 12px; margin-top: 18px; }
-.tag { display: inline-block; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; color: var(--accent); }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; color: var(--accent); margin-right: 6px; }
+.tag.warn-tag { color: var(--warn); border-color: #5c4a18; }
 code { font-family: var(--mono); font-size: 0.9em; }
 a { color: var(--accent); }
+.hint { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+.sensitive {
+  background: #1a2218; border-left: 3px solid var(--accent);
+  padding: 10px 12px; border-radius: 0 10px 10px 0; margin: 0;
+}
+.map-wrap { overflow: hidden; border-radius: 12px; border: 1px solid var(--line); }
+.corridor-map { width: 100%; height: auto; display: block; }
+.co2-panel {
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line);
+}
+.moves { display: grid; gap: 12px; }
+.move {
+  background: #0e1613; border: 1px solid var(--line); border-radius: 12px; padding: 12px;
+}
+.move-head { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+.take-move { margin-top: 8px; }
+@media (max-width: 640px) {
+  .metric b { font-size: 1.2rem; }
+}

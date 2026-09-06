@@ -73,6 +73,15 @@ function samplePoints(points: Array<{ latitude: number; longitude: number }>, n 
   return out;
 }
 
+/** Downsample leg points for SVG polyline (keep deps light). */
+function simplifyRoute(points: Array<{ latitude: number; longitude: number }>, max = 48): LatLng[] {
+  if (!points.length) return [];
+  if (points.length <= max) {
+    return points.map((p) => ({ lat: p.latitude, lon: p.longitude }));
+  }
+  return samplePoints(points, max);
+}
+
 export async function analyzeRoute(originQ: string, destQ: string): Promise<JamBreathResult> {
   if (!hasTomTomKey()) return fixtureResult();
 
@@ -83,6 +92,7 @@ export async function analyzeRoute(originQ: string, destQ: string): Promise<JamB
   const primary = routes[0];
   const summary = primary.summary;
   const legs = primary.legs?.[0]?.points || [];
+  const routePoints = simplifyRoute(legs, 48);
   const pts = samplePoints(legs, 5);
   const flows = (await Promise.all(pts.map(flowAt))).filter(Boolean) as FlowSample[];
   const jammyCount = flows.filter((f) => f.relativeSpeed < 0.55).length;
@@ -124,6 +134,7 @@ export async function analyzeRoute(originQ: string, destQ: string): Promise<JamB
     idleCo2G: idleCo2Grams(delayMin),
     flowSamples: flows,
     jammyCount,
+    routePoints: routePoints.length >= 2 ? routePoints : [o.pos, d.pos],
     aqi,
     alternate,
     fetchedAt: new Date().toISOString(),

@@ -30,6 +30,8 @@ export type JamBreathResult = {
   idleCo2G: number;
   flowSamples: FlowSample[];
   jammyCount: number;
+  /** Full or simplified route polyline for the corridor map */
+  routePoints: LatLng[];
   aqi?: { pm25: number; usAqi: number; lat: number; lon: number };
   alternate?: { travelTimeSeconds: number; trafficDelaySeconds: number; note: string };
   fetchedAt: string;
