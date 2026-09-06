@@ -10,7 +10,7 @@ https://moscraciunxxx.github.io/jambreath/
 
 1. Open the demo (fixture mode works with no API key).
 2. Pick a preset (e.g. LA school-run) and click Fetch live impact.
-3. Read the corridor map, delay, idle CO2 (ESTIMATE), jammy segments, and AQH asthma lens.
+3. Read the corridor map, delay, idle CO2 (ESTIMATE), jammy segments, and AQI asthma lens.
 4. Toggle Rush-hour / worst-of-day to frame a peak ESTIMATE shen live delay is low.
 5. Expand the honest CO2 card and switch low/mid/high factors; try healthier moves and log impact.
 6. Download a PNG/JSON receipt; check session + this-week ledger.
@@ -30,7 +30,7 @@ Without a key the app runs in fixture mode (realistic LA corridor demo).
 
 1. Add repository secret VITE_TOMTOM_API_KEY (Settings — Secrets and variables — Actions).
 2. In the TomTom developer portal, whitelist https://moscraciunxxx.github.io
-3. The workflow .github/workflows/pages.yml passes the secret into the Vite build when present.
+3. Ensure pages.yml build env includes VITE_TOMTOM_API_KEY from secrets (see local branch chore/pages-live-key; push needs workflow scope).
 4. Never commit the key; .env stays gitignored. Without the secret, Pages stays in fixture mode.
 
 ## Features (upgrades)
@@ -58,7 +58,7 @@ Idle CO2 uses 20 g/min as the default mid passenger-car idle factor (common cite
 
 ## Stack
 
-TypeScript, Vite, Vitest, TomTom (optional), Open-Meteo AQH, GitHub Pages. Map is a lightweight SVG (no map SDK).
+TypeScript, Vite, Vitest, TomTom (optional), Open-Meteo AQI, GitHub Pages. Map is a lightweight SVG (no map SDK).
 
 ## Repo
 
