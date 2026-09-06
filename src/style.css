@@ -1,0 +1,55 @@
+:root {
+  --bg: #0b1210;
+  --card: #121c18;
+  --line: #24332c;
+  --ink: #e7f2ea;
+  --muted: #8fa89a;
+  --accent: #3dffa8;
+  --warn: #ffc857;
+  --bad: #ff6b6b;
+  --ok: #3dffa8;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: system-ui, -apple-system, Segoe UI, sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: radial-gradient(1200px 600px at 20% -10%, #143126, var(--bg));
+  color: var(--ink); font: 15px/1.5 var(--sans);
+}
+h1 { margin: 0 0 6px; font-size: clamp(1.6rem, 3vw, 2rem); letter-spacing: -0.03em; }
+.wrap { max-width: 920px; margin: 0 auto; padding: 28px 18px 64px; }
+.thesis { color: var(--muted); max-width: 62ch; margin: 0 0 18px; }
+.banner {
+  background: #2a2310; border: 1px solid #5c4a18; color: #ffe6a3;
+  padding: 10px 12px; border-radius: 10px; margin-bottom: 16px; font-size: 14px;
+}
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 16px; margin-bottom: 14px;
+}
+.row { display: flex; flex-wrap: wrap; gap: 10px; }
+label { display: flex; flex-direction: column; gap: 4px; flex: 1 1 220px; font-size: 13px; color: var(--muted); }
+input, select, button {
+  font: inherit; border-radius: 10px; border: 1px solid var(--line);
+  background: #0e1613; color: var(--ink); padding: 10px 12px;
+}
+button {
+  background: var(--accent); color: #062016; font-weight: 700; border: none; cursor: pointer;
+}
+button.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.metric {
+  background: #0e1613; border: 1px solid var(--line); border-radius: 12px; padding: 12px;
+}
+.metric b { display: block; font-size: 1.45rem; font-family: var(--mono); }
+.metric span { color: var(--muted); font-size: 12px; }
+.metric.bad b { color: var(--bad); }
+.metric.warn b { color: var(--warn); }
+.metric.ok b { color: var(--ok); }
+.list { margin: 0; padding-left: 18px; color: var(--muted); }
+.list li { margin: 6px 0; }
+.foot { color: var(--muted); font-size: 12px; margin-top: 18px; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; color: var(--accent); }
+code { font-family: var(--mono); font-size: 0.9em; }
+a { color: var(--accent); }
