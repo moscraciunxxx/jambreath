@@ -5,3 +5,4 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+declare module 'leaflet/dist/leaflet.css';

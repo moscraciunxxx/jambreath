@@ -8,11 +8,16 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "demo:audio": "bash scripts/make-demo-audio.sh"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.22",
     "typescript": "~5.7.2",
     "vite": "^6.0.0",
     "vitest": "^2.1.0"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4"
   }
 }

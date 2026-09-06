@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="JamBreath">
+  <rect width="512" height="512" rx="96" fill="#0b1210"/>
+  <path d="M80 320c40-120 120-180 176-180s136 60 176 180" fill="none" stroke="#3dffa8" stroke-width="36" stroke-linecap="round"/>
+  <circle cx="160" cy="340" r="28" fill="#ff6b6b"/>
+  <circle cx="256" cy="300" r="28" fill="#ffc857"/>
+  <circle cx="352" cy="340" r="28" fill="#3dffa8"/>
+  <text x="256" y="455" text-anchor="middle" fill="#8fa89a" font-family="system-ui,sans-serif" font-size="48" font-weight="700">JB</text>
+</svg>

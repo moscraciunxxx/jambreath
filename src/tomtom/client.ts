@@ -1,6 +1,7 @@
-import type { FlowSample, JamBreathResult, LatLng } from './types';
+import type { FlowSample, JamBreathResult, LatLng, RouteStop } from './types';
 import { delayMinutes, idleCo2Grams } from '../impact/co2';
 import { fixtureResult } from './fixture';
+import { detectCityFromLabel } from '../impact/city';
 
 const KEY = () => (import.meta.env.VITE_TOMTOM_API_KEY || '').trim();
 
@@ -21,8 +22,8 @@ async function geocode(q: string): Promise<{ pos: LatLng; label: string }> {
   };
 }
 
-async function route(origin: LatLng, dest: LatLng) {
-  const path = `${origin.lat},${origin.lon}:${dest.lat},${dest.lon}`;
+async function route(points: LatLng[]) {
+  const path = points.map((p) => `${p.lat},${p.lon}`).join(':');
   const url = `https://api.tomtom.com/routing/1/calculateRoute/${path}/json?key=${KEY()}&traffic=true&travelMode=car&computeBestOrder=false&sectionType=traffic&maxAlternatives=1`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Routing failed (${res.status})`);
@@ -73,8 +74,8 @@ function samplePoints(points: Array<{ latitude: number; longitude: number }>, n 
   return out;
 }
 
-/** Downsample leg points for SVG polyline (keep deps light). */
-function simplifyRoute(points: Array<{ latitude: number; longitude: number }>, max = 48): LatLng[] {
+/** Downsample leg points for map polyline. */
+function simplifyRoute(points: Array<{ latitude: number; longitude: number }>, max = 64): LatLng[] {
   if (!points.length) return [];
   if (points.length <= max) {
     return points.map((p) => ({ lat: p.latitude, lon: p.longitude }));
@@ -82,18 +83,49 @@ function simplifyRoute(points: Array<{ latitude: number; longitude: number }>, m
   return samplePoints(points, max);
 }
 
-export async function analyzeRoute(originQ: string, destQ: string): Promise<JamBreathResult> {
-  if (!hasTomTomKey()) return fixtureResult();
+function collectLegPoints(primary: {
+  legs?: Array<{ points?: Array<{ latitude: number; longitude: number }> }>;
+}): Array<{ latitude: number; longitude: number }> {
+  const legs = primary.legs || [];
+  const all: Array<{ latitude: number; longitude: number }> = [];
+  for (const leg of legs) {
+    for (const p of leg.points || []) all.push(p);
+  }
+  return all;
+}
 
-  const [o, d] = await Promise.all([geocode(originQ), geocode(destQ)]);
-  const routed = await route(o.pos, d.pos);
+/**
+ * Analyze origin → optional stops → destination.
+ * Live TomTom uses calculateRoute waypoints; fixture aggregates multi-leg.
+ */
+export async function analyzeRoute(
+  originQ: string,
+  destQ: string,
+  stopQueries: string[] = [],
+): Promise<JamBreathResult> {
+  const stopsClean = stopQueries.map((s) => s.trim()).filter(Boolean);
+  if (!hasTomTomKey()) return fixtureResult(stopsClean);
+
+  const [o, d, ...stopGeos] = await Promise.all([
+    geocode(originQ),
+    geocode(destQ),
+    ...stopsClean.map((q) => geocode(q)),
+  ]);
+
+  const stops: RouteStop[] = stopGeos.map((g, i) => ({
+    label: g.label || stopsClean[i],
+    pos: g.pos,
+  }));
+
+  const wayPoints = [o.pos, ...stops.map((s) => s.pos), d.pos];
+  const routed = await route(wayPoints);
   const routes = routed.routes || [];
   if (!routes.length) throw new Error('No routes returned');
   const primary = routes[0];
   const summary = primary.summary;
-  const legs = primary.legs?.[0]?.points || [];
-  const routePoints = simplifyRoute(legs, 48);
-  const pts = samplePoints(legs, 5);
+  const legsPts = collectLegPoints(primary);
+  const routePoints = simplifyRoute(legsPts, 64);
+  const pts = samplePoints(legsPts, Math.min(8, 3 + stops.length * 2));
   const flows = (await Promise.all(pts.map(flowAt))).filter(Boolean) as FlowSample[];
   const jammyCount = flows.filter((f) => f.relativeSpeed < 0.55).length;
   const travel = summary.travelTimeInSeconds;
@@ -102,6 +134,7 @@ export async function analyzeRoute(originQ: string, destQ: string): Promise<JamB
   const delayMin = delayMinutes(travel, free);
   const mid = pts[Math.floor(pts.length / 2)] || o.pos;
   const aqi = await aqiNear(mid);
+  const city = detectCityFromLabel(d.label, o.label);
 
   let alternate: JamBreathResult['alternate'];
   if (routes[1]) {
@@ -134,7 +167,10 @@ export async function analyzeRoute(originQ: string, destQ: string): Promise<JamB
     idleCo2G: idleCo2Grams(delayMin),
     flowSamples: flows,
     jammyCount,
-    routePoints: routePoints.length >= 2 ? routePoints : [o.pos, d.pos],
+    routePoints: routePoints.length >= 2 ? routePoints : wayPoints,
+    stops,
+    city,
+    legCount: 1 + stops.length,
     aqi,
     alternate,
     fetchedAt: new Date().toISOString(),

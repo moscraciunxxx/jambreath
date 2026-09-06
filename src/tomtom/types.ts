@@ -19,6 +19,11 @@ export type FlowSample = {
   relativeSpeed: number; // current/freeFlow
 };
 
+export type RouteStop = {
+  label: string;
+  pos: LatLng;
+};
+
 export type JamBreathResult = {
   mode: 'live' | 'fixture';
   origin: LatLng;
@@ -35,4 +40,10 @@ export type JamBreathResult = {
   aqi?: { pm25: number; usAqi: number; lat: number; lon: number };
   alternate?: { travelTimeSeconds: number; trafficDelaySeconds: number; note: string };
   fetchedAt: string;
+  /** Optional multi-stop school-run waypoints */
+  stops?: RouteStop[];
+  /** Detected / preset city for cohort board */
+  city?: string;
+  /** Number of route legs (1 + stops) */
+  legCount?: number;
 };

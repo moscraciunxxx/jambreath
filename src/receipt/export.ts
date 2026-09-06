@@ -1,5 +1,5 @@
 import type { JamBreathResult } from '../tomtom/types';
-import type { Co2FactorLevel } from '../impact/co2';
+import type { Co2FactorLevel, VehicleClass } from '../impact/co2';
 import type { AqiAdvice } from '../impact/aqi';
 
 export type ReceiptPayload = {
@@ -12,6 +12,7 @@ export type ReceiptPayload = {
   delayIsEstimate: boolean;
   idleCo2G: number;
   co2Factor: Co2FactorLevel;
+  vehicleClass?: VehicleClass;
   aqi?: { usAqi: number; pm25: number; category?: string };
   origin: string;
   destination: string;
@@ -27,6 +28,7 @@ export function buildReceiptPayload(
     delayIsEstimate: boolean;
     idleCo2G: number;
     co2Factor: Co2FactorLevel;
+    vehicleClass?: VehicleClass;
     aqiAdvice?: AqiAdvice;
   },
 ): ReceiptPayload {
@@ -40,6 +42,7 @@ export function buildReceiptPayload(
     delayIsEstimate: opts.delayIsEstimate,
     idleCo2G: opts.idleCo2G,
     co2Factor: opts.co2Factor,
+    vehicleClass: opts.vehicleClass,
     aqi: r.aqi
       ? {
           usAqi: r.aqi.usAqi,
@@ -69,7 +72,6 @@ export function downloadReceiptPng(payload: ReceiptPayload, filename = 'jambreat
   canvas.width = 900;
   canvas.height = 520;
   const ctx = canvas.getContext('2d')!;
-  // background
   ctx.fillStyle = '#0b1210';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = '#143126';
@@ -91,11 +93,17 @@ export function downloadReceiptPng(payload: ReceiptPayload, filename = 'jambreat
 
   const rows: Array<[string, string]> = [
     ['Delay', `${payload.delayMin.toFixed(1)} min${payload.delayIsEstimate ? ' (ESTIMATE)' : ''}`],
-    ['Idle CO₂', `${payload.idleCo2G} g (${payload.co2Factor} factor) · ESTIMATE`],
+    [
+      'Idle CO₂',
+      `${payload.idleCo2G} g (${payload.vehicleClass || 'mid'} · ${payload.co2Factor}) · ESTIMATE`,
+    ],
     ['Jammy segments', `${payload.jammyCount} / ${payload.flowSampleCount}`],
   ];
   if (payload.aqi) {
-    rows.push(['US AQI', `${Math.round(payload.aqi.usAqi)}${payload.aqi.category ? ` · ${payload.aqi.category}` : ''} (PM2.5 ${payload.aqi.pm25})`]);
+    rows.push([
+      'US AQI',
+      `${Math.round(payload.aqi.usAqi)}${payload.aqi.category ? ` · ${payload.aqi.category}` : ''} (PM2.5 ${payload.aqi.pm25})`,
+    ]);
   }
 
   let y = 220;
@@ -111,7 +119,7 @@ export function downloadReceiptPng(payload: ReceiptPayload, filename = 'jambreat
 
   ctx.fillStyle = '#8fa89a';
   ctx.font = '12px system-ui,sans-serif';
-  ctx.fillText('Idle CO₂ is an ESTIMATE (10–40 g/min range). Not a lifecycle assessment.', 36, canvas.height - 28);
+  ctx.fillText('Idle CO₂ is an ESTIMATE. Not a lifecycle assessment.', 36, canvas.height - 28);
 
   canvas.toBlob((blob) => {
     if (!blob) return;

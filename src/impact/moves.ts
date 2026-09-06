@@ -1,4 +1,4 @@
-import { idleCo2Grams, type Co2FactorLevel } from './co2';
+import { idleCo2Grams, type Co2FactorLevel, type VehicleClass } from './co2';
 
 export type MoveKind = 'alt-route' | 'leave-later' | 'bike' | 'transit';
 
@@ -18,6 +18,7 @@ export type MovesInput = {
   travelTimeSeconds: number;
   lengthMeters: number;
   factor?: Co2FactorLevel;
+  vehicle?: VehicleClass;
   alternate?: { travelTimeSeconds: number; trafficDelaySeconds: number; note: string };
 };
 
@@ -29,6 +30,7 @@ const TRANSIT_ACCESS_MIN = 8;
 
 export function healthierMoves(input: MovesInput): HealthierMove[] {
   const factor = input.factor ?? 'mid';
+  const vehicle = input.vehicle ?? 'mid';
   const delay = Math.max(0, input.delayMin);
   const km = Math.max(0.5, input.lengthMeters / 1000);
   const driveMin = Math.max(1, input.travelTimeSeconds / 60);
@@ -41,7 +43,7 @@ export function healthierMoves(input: MovesInput): HealthierMove[] {
       kind: 'alt-route',
       title: 'Alternate drive route',
       minutesEstimate: Math.round(input.alternate.travelTimeSeconds / 60),
-      idleCo2AvoidedG: idleCo2Grams(saved, factor),
+      idleCo2AvoidedG: idleCo2Grams(saved, factor, vehicle),
       note: input.alternate.note,
       isEstimate: /estimate/i.test(input.alternate.note),
     });
@@ -54,7 +56,7 @@ export function healthierMoves(input: MovesInput): HealthierMove[] {
     kind: 'leave-later',
     title: `Leave ~${leaveWait} min later`,
     minutesEstimate: Math.round(driveMin - leaveSaved + leaveWait),
-    idleCo2AvoidedG: idleCo2Grams(leaveSaved, factor),
+    idleCo2AvoidedG: idleCo2Grams(leaveSaved, factor, vehicle),
     note: `ESTIMATE: waiting ~${leaveWait} min may shed ~${leaveSaved.toFixed(0)} min of jam delay (heuristic, not live prediction).`,
     isEstimate: true,
   });
@@ -64,7 +66,7 @@ export function healthierMoves(input: MovesInput): HealthierMove[] {
     kind: 'bike',
     title: 'Bike instead',
     minutesEstimate: bikeMin,
-    idleCo2AvoidedG: idleCo2Grams(delay, factor),
+    idleCo2AvoidedG: idleCo2Grams(delay, factor, vehicle),
     note: `ESTIMATE: ~${km.toFixed(1)} km at ~${BIKE_KMH} km/h urban. Avoids the jam's idle CO₂ entirely (no car idle).`,
     isEstimate: true,
   });
@@ -74,7 +76,7 @@ export function healthierMoves(input: MovesInput): HealthierMove[] {
     kind: 'transit',
     title: 'Transit instead',
     minutesEstimate: transitMin,
-    idleCo2AvoidedG: idleCo2Grams(delay, factor),
+    idleCo2AvoidedG: idleCo2Grams(delay, factor, vehicle),
     note: `ESTIMATE: ~${km.toFixed(1)} km at ~${TRANSIT_KMH} km/h + ${TRANSIT_ACCESS_MIN} min access/wait. Avoids sitting in the car queue.`,
     isEstimate: true,
   });

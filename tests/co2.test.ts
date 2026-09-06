@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { delayMinutes, idleCo2Grams, co2RangeGrams, CO2_FACTORS } from '../src/impact/co2';
+import { delayMinutes, idleCo2Grams, co2RangeGrams, CO2_FACTORS, VEHICLE_IDLE_G_PER_MIN, idleGPerMin } from '../src/impact/co2';
 import { fixtureResult } from '../src/tomtom/fixture';
 import { aqiAdvice, aqiCategory } from '../src/impact/aqi';
 import { peakHourEstimate, LOW_DELAY_THRESHOLD_MIN } from '../src/impact/rushHour';
@@ -8,6 +8,7 @@ import { isoWeekKey, emptyWeek, addAvoided } from '../src/impact/ledger';
 import { BUILTIN_PRESETS, addCorridor, loadSavedCorridors, removeCorridor } from '../src/impact/bookmarks';
 import { corridorMapSvg } from '../src/map/corridorSvg';
 import { buildReceiptPayload } from '../src/receipt/export';
+import { diurnalFactor, timeTravelEstimate, delayAcrossDay, isPeakHour } from '../src/impact/timeTravel';
 
 describe('impact math', () => {
   it('computes delay minutes from travel vs free-flow', () => {
@@ -146,5 +147,45 @@ describe('map + receipt helpers', () => {
     expect(payload.app).toBe('JamBreath');
     expect(payload.mode).toBe('fixture');
     expect(payload.timestamp).toBeTruthy();
+  });
+});
+
+describe("vehicle + multi-stop", () => {
+  it("vehicle classes recompute idle CO2; EV is ~0", () => {
+    expect(VEHICLE_IDLE_G_PER_MIN.ev).toBe(0);
+    expect(idleGPerMin("ev", "high")).toBe(0);
+    expect(idleCo2Grams(10, "mid", "ev")).toBe(0);
+    expect(idleCo2Grams(10, "mid", "suv")).toBe(320);
+    expect(idleCo2Grams(10, "mid", "compact")).toBe(150);
+    expect(idleCo2Grams(10, "mid", "hybrid")).toBe(80);
+  });
+  it("fixture multi-stop aggregates legs", () => {
+    const f = fixtureResult(["Stop A", "Stop B"]);
+    expect(f.stops?.length).toBe(2);
+    expect(f.legCount).toBe(3);
+    expect(f.delayMin).toBeGreaterThan(fixtureResult().delayMin);
+  });
+});
+
+describe("time travel", () => {
+  it("diurnal curve peaks in rush hours", () => {
+    expect(diurnalFactor(8)).toBeGreaterThan(diurnalFactor(3));
+    expect(diurnalFactor(17)).toBeGreaterThan(diurnalFactor(13));
+    expect(isPeakHour(8)).toBe(true);
+    expect(isPeakHour(12)).toBe(false);
+  });
+  it("labels non-now departures as ESTIMATE", () => {
+    const now = new Date("2026-09-06T15:00:00");
+    const peak = timeTravelEstimate(10, 8, now);
+    expect(peak.isEstimate).toBe(true);
+    expect(peak.label).toMatch(/PEAK ESTIMATE|ESTIMATE/);
+    const off = timeTravelEstimate(10, 2, now);
+    expect(off.isEstimate).toBe(true);
+    expect(off.label.toLowerCase()).toContain("off-peak");
+    const live = timeTravelEstimate(10, "now", now);
+    expect(live.isEstimate).toBe(false);
+  });
+  it("sparkline has 24 hours", () => {
+    expect(delayAcrossDay(10)).toHaveLength(24);
   });
 });

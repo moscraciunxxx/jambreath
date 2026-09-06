@@ -7,11 +7,20 @@ Live traffic jams to idle CO2 estimates and healthier move suggestions (leave la
 https://moscraciunxxx.github.io/jambreath/
 
 ## Judge path (2 minutes)
+### Demo the shipped six
+
+1. Spoken walkthrough script under scripts/.
+2. Judge tour Play 60s demo button.
+3. Leaflet map tiles with SVG fallback.
+4. Vehicle-class CO2 calibration.
+5. Departure-hour time-travel PEAK ESTIMATE.
+6. Multi-stop school run aggregated impact.
+
 
 1. Open the demo (fixture mode works with no API key).
 2. Pick a preset (e.g. LA school-run) and click Fetch live impact.
 3. Read the corridor map, delay, idle CO2 (ESTIMATE), jammy segments, and AQI asthma lens.
-4. Toggle Rush-hour / worst-of-day to frame a peak ESTIMATE shen live delay is low.
+4. Toggle Rush-hour / worst-of-day to frame a peak ESTIMATE when live delay is low.
 5. Expand the honest CO2 card and switch low/mid/high factors; try healthier moves and log impact.
 6. Download a PNG/JSON receipt; check session + this-week ledger.
 7. Optional: set a TomTom key locally (or as a GitHub Actions secret) for live Flow + Routing.
@@ -58,7 +67,7 @@ Idle CO2 uses 20 g/min as the default mid passenger-car idle factor (common cite
 
 ## Stack
 
-TypeScript, Vite, Vitest, TomTom (optional), Open-Meteo AQI, GitHub Pages. Map is a lightweight SVG (no map SDK).
+TypeScript, Vite, Vitest, TomTom (optional), Open-Meteo AQI, GitHub Pages. Map uses Leaflet tiles with SVG fallback.
 
 ## Repo
 
